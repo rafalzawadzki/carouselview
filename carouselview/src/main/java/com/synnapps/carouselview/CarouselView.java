@@ -510,6 +510,10 @@ public class CarouselView extends FrameLayout {
         mIndicator.setPageColor(pageColor);
     }
 
+    public void setPageMargin(int marginPixels) {
+        containerViewPager.setPageMargin(marginPixels);
+    }
+
     public void setStrokeWidth(float strokeWidth) {
         mIndicator.setStrokeWidth(strokeWidth);
         int padding = (int) strokeWidth;
