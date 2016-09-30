@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews.RemoteView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -53,6 +59,8 @@ public class CarouselView extends FrameLayout {
     private boolean disableAutoPlayOnUserInteraction;
     private boolean animateOnBoundary = true;
 
+    private int mScreenWidth;
+    private int mScreenHeight;
     private int previousState;
 
     private ViewPager.PageTransformer pageTransformer;
@@ -226,8 +234,9 @@ public class CarouselView extends FrameLayout {
         this.disableAutoPlayOnUserInteraction = disableAutoPlayOnUserInteraction;
     }
 
-    private void setData() {
-        CarouselPagerAdapter carouselPagerAdapter = new CarouselPagerAdapter(getContext());
+    private void setData(FragmentManager fm, List<CarouselFragment> srcImgs) {
+        CarouselPagerAdapter carouselPagerAdapter = new CarouselPagerAdapter(getContext(), fm);
+        carouselPagerAdapter.setPagerFragments(srcImgs);
         containerViewPager.setAdapter(carouselPagerAdapter);
         mIndicator.setViewPager(containerViewPager);
         mIndicator.requestLayout();
@@ -287,23 +296,32 @@ public class CarouselView extends FrameLayout {
     }
 
 
-    private class CarouselPagerAdapter extends PagerAdapter {
+    protected class CarouselPagerAdapter extends FragmentStatePagerAdapter {
         private Context mContext;
+        private List<CarouselFragment> pagerFragments;
 
-        public CarouselPagerAdapter(Context context) {
+        public CarouselPagerAdapter(Context context, FragmentManager fm) {
+            super(fm);
             mContext = context;
         }
 
-        @Override
+        public List<CarouselFragment> getPagerFragments() {
+            return pagerFragments;
+        }
+
+        public void setPagerFragments(final List<CarouselFragment> pagerFragments) {
+            this.pagerFragments = pagerFragments;
+        }
+
+        /*@Override
         public Object instantiateItem(ViewGroup collection, int position) {
 
             Object objectToReturn;
 
             //Either let user set image to ImageView
             if (mImageListener != null) {
-
                 ImageView imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));  //setting image position
+                imageView.setLayoutParams(new LayoutParams(mScreenWidth - 200, LayoutParams.WRAP_CONTENT));  //setting image position
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 objectToReturn = imageView;
@@ -338,11 +356,21 @@ public class CarouselView extends FrameLayout {
         @Override
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
+        }*/
+
+        @Override
+        public Fragment getItem(int position) {
+            return (pagerFragments != null && pagerFragments.size() > position) ?
+                    pagerFragments.get(position) : null;
         }
 
         @Override
         public int getCount() {
-            return getPageCount();
+            return (pagerFragments != null) ? pagerFragments.size() : 0;
+        }
+
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
         }
     }
 
@@ -407,10 +435,10 @@ public class CarouselView extends FrameLayout {
         return mPageCount;
     }
 
-    public void setPageCount(int mPageCount) {
+    public void setPageCount(int mPageCount, FragmentManager fm, List<CarouselFragment> srcImgs) {
         this.mPageCount = mPageCount;
 
-        setData();
+        setData(fm, srcImgs);
     }
 
     public void addOnPageChangeListener(ViewPager.OnPageChangeListener listener) {
@@ -518,5 +546,13 @@ public class CarouselView extends FrameLayout {
         mIndicator.setStrokeWidth(strokeWidth);
         int padding = (int) strokeWidth;
         mIndicator.setPadding(padding, padding, padding, padding);
+    }
+
+    public void setLayoutParams(int screenHeight, int screenWidth) {
+        mScreenHeight = screenHeight;
+        mScreenWidth = screenWidth;
+    }
+
+    public void setFragmentViews(List<Fragment> srcImgs) {
     }
 }
