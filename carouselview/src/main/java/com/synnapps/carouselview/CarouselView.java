@@ -8,20 +8,16 @@ import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews.RemoteView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,6 +35,9 @@ public class CarouselView extends FrameLayout {
     private static final int DEFAULT_SLIDE_INTERVAL = 3500;
     private static final int DEFAULT_SLIDE_VELOCITY = 400;
 
+    public final static float BIG_SCALE = 1.0f;
+    public final static float SMALL_SCALE = 0.7f;
+    public final static float DIFF_SCALE = BIG_SCALE - SMALL_SCALE;
 
     private int mPageCount;
     private int slideInterval = DEFAULT_SLIDE_INTERVAL;
@@ -235,6 +234,10 @@ public class CarouselView extends FrameLayout {
     }
 
     private void setData(FragmentManager fm, List<CarouselFragment> srcImgs) {
+        // move last item to first position
+        int lastPosition = srcImgs.size() - 1;
+        srcImgs.add(0, srcImgs.remove(lastPosition));
+
         CarouselPagerAdapter carouselPagerAdapter = new CarouselPagerAdapter(getContext(), fm);
         carouselPagerAdapter.setPagerFragments(srcImgs);
         containerViewPager.setAdapter(carouselPagerAdapter);
@@ -312,51 +315,6 @@ public class CarouselView extends FrameLayout {
         public void setPagerFragments(final List<CarouselFragment> pagerFragments) {
             this.pagerFragments = pagerFragments;
         }
-
-        /*@Override
-        public Object instantiateItem(ViewGroup collection, int position) {
-
-            Object objectToReturn;
-
-            //Either let user set image to ImageView
-            if (mImageListener != null) {
-                ImageView imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new LayoutParams(mScreenWidth - 200, LayoutParams.WRAP_CONTENT));  //setting image position
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-                objectToReturn = imageView;
-                mImageListener.setImageForPosition(position, imageView);
-
-                collection.addView(imageView);
-
-                //Or let user add his own ViewGroup
-            } else if (mViewListener != null) {
-
-                View view = mViewListener.setViewForPosition(position);
-
-                if (null != view) {
-                    objectToReturn = view;
-                    collection.addView(view);
-                } else {
-                    throw new RuntimeException("View can not be null for position " + position);
-                }
-
-            } else {
-                throw new RuntimeException("View must set " + ImageListener.class.getSimpleName() + " or " + ViewListener.class.getSimpleName() + ".");
-            }
-
-            return objectToReturn;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup collection, int position, Object view) {
-            collection.removeView((View) view);
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }*/
 
         @Override
         public Fragment getItem(int position) {
@@ -471,7 +429,7 @@ public class CarouselView extends FrameLayout {
 
     public void setIndicatorGravity(int gravity) {
         mIndicatorGravity = gravity;
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = mIndicatorGravity;
         params.setMargins(indicatorMarginHorizontal, indicatorMarginVertical, indicatorMarginHorizontal, indicatorMarginVertical);
         mIndicator.setLayoutParams(params);
@@ -548,11 +506,4 @@ public class CarouselView extends FrameLayout {
         mIndicator.setPadding(padding, padding, padding, padding);
     }
 
-    public void setLayoutParams(int screenHeight, int screenWidth) {
-        mScreenHeight = screenHeight;
-        mScreenWidth = screenWidth;
-    }
-
-    public void setFragmentViews(List<Fragment> srcImgs) {
-    }
 }

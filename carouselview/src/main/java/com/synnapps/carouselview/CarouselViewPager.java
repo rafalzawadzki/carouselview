@@ -1,10 +1,8 @@
 package com.synnapps.carouselview;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.animation.Interpolator;
 
 import java.lang.reflect.Field;
@@ -16,6 +14,7 @@ import java.util.List;
 public class CarouselViewPager extends ViewPager {
 
     private OnPageChangeListener externalOnPageChangeListener = null;
+    private PageChangeListener actualPageChangeListener = null;
 
     public CarouselViewPager(Context context) {
         super(context);
@@ -48,6 +47,14 @@ public class CarouselViewPager extends ViewPager {
             scroller.set(this, mScroller);
         } catch (Exception e) {
         }
+    }
+
+    // move the last item to the front of the list so we don't start with empty space on the left
+    private void initPagerFragments() {
+        CarouselView.CarouselPagerAdapter adapter = (CarouselView.CarouselPagerAdapter) getAdapter();
+        List<CarouselFragment> pagerFragments = adapter.getPagerFragments();
+        final int lastPosition = pagerFragments.size() - 1;
+        pagerFragments.add(0, pagerFragments.remove(lastPosition));
     }
 
     /**
@@ -138,7 +145,7 @@ public class CarouselViewPager extends ViewPager {
      * Cycles through the fragments in the given pagerFragments list,
      * depending on the current position that is passed in.
      *
-     * @param pagerFragments A {@link java.util.List} containing
+     * @param pagerFragments A {@link List} containing
      *                      {@link android.support.v4.app.Fragment} to be cycled.
      * @param position       The position of the currently selected item in the pager fragments.
      * @return -1 if the viewpager items were cycled to the right,
