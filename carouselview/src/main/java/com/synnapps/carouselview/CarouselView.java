@@ -407,6 +407,10 @@ public class CarouselView extends FrameLayout {
         containerViewPager.setCurrentItem(item);
     }
 
+    public int getCurrentItem() {
+        return containerViewPager.getCurrentItem();
+    }
+
     public int getIndicatorMarginVertical() {
         return indicatorMarginVertical;
     }
